@@ -1,0 +1,66 @@
+.schedule_sync{
+    margin: 0px;
+    margin-top: 0px;
+}
+
+input{
+    padding-top: 10px;
+    margin: 10px;
+}
+
+input[type=submit]{
+    margin: 10px;
+    padding: 10px 110px;
+}
+.generate_btn{
+    margin-bottom: 100px;
+    margin-top: 100px;
+}
+
+.password{
+    padding-left: 30px;
+}
+
+a{
+    color: white;
+    font-size: 30px;
+}
+
+
+form{
+    text-align: center;
+
+}
+
+select{
+    padding: 10px;
+    margin: 10px;
+}
+
+.navbar ul{
+    display: flex;
+    list-style-type: none;
+    height: 50%;
+    margin-top: 0px;
+    background-color: black;
+    align-items: center;
+    overflow: hidden;
+}
+.navbar li{
+    float: None;
+    padding: 0px 30px;
+}
+
+button{
+    padding: 10px 110px;
+    display: block;
+    margin: auto;
+}
+
+h1{
+    text-align: center;
+}
+
+h3{
+    text-align: center;
+}

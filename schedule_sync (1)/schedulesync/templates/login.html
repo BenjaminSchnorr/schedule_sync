@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap/css/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>Schedule Sync</title>
+</head>
+<body class="schedule_sync">
+    <navbar class="navbar">
+        <ul>
+
+            <li><img src="{{ url_for('static', filename='logo_2.png') }}"></li>
+<!--            <li><h1 color="white">Schedule Sync</h1></li>-->
+        </ul>
+    </navbar>
+    <h1>Login</h1>
+      <form action="/login" method="post">
+        <label>Password</label>
+        <input name="password" type="password"><br>
+
+        <input type="submit" value="login">
+      </form>
+
+</body>
+</html>
