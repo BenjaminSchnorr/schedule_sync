@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap/css/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>Schedule Sync</title>
+</head>
+<body class="schedule_sync">
+    <navbar class="navbar">
+        <ul>
+
+            <li><img src="{{ url_for('static', filename='logo_2.png') }}"></li>
+            <li><a href="/">Home</a></li>
+            <li><a href="/logout">Logout</a></li>
+            <li><a href="/change_password">Change Password</a></li>
+        </ul>
+    </navbar>
+    <h1>Schedule Sync</h1>
+    <form>
+        <label>Select Term</label>
+        <select id="terms_list" required>
+            <option disabled selected value="">Select Term</option>
+            {% for term in terms %}
+            <option value="{{ term }}">{{ term }}</option>
+            {% endfor %}
+        </select>
+    </form>
+    <button id="retrieve_btn" type="button" disabled="true">Retrieve Schedules</button><br>
+    <h3 id="retrieve_status"></h3>
+
+    <!--    I got this progress bar from bootstrap https://getbootstrap.com/docs/4.0/components/progress/-->
+    <div class="progress">
+        <div id="retrieve_bar" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%"></div>
+
+    </div>
+
+    <button id="generate_btn" type="button" disabled="true">Generate Outlook Invites</button>
+    <h3 id="generate_status"></h3>
+    <div class="progress">
+        <div id="generate_bar" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%"></div>
+    </div>
+
+
+    <script>
+        const terms_list = document.getElementById("terms_list")
+
+
+        const retrieve_btn = document.getElementById("retrieve_btn");
+        retrieve_btn.addEventListener("click", retrieve_schedules);
+        let interval;
+        let status;
+        let term;
+
+        terms_list.addEventListener('change', function(){
+            term = this.value;
+            retrieve_btn.removeAttribute("disabled")
+        });
+
+        function retrieve_schedules(){
+            terms_list.setAttribute("disabled", true)
+            console.log("retrieve button clicked");
+            retrieve_btn.setAttribute("disabled", true)
+            status = document.getElementById("retrieve_status")
+            let data = new FormData()
+            data.append("term", term)
+            fetch("/start_retrieval", {
+                method: "POST",
+                body: data,
+            })
+                .then(response => response.json())
+                .then(data => console.log(data))
+                .then(() => {
+                    interval = setInterval(check_progress, 1000, "retrieve_bar")
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        const generate_btn = document.getElementById("generate_btn");
+        generate_btn.addEventListener("click", generate_invites);
+
+        function generate_invites(){
+            console.log("generate_invites_button_clicked");
+            generate_btn.setAttribute("disabled", true)
+            status = document.getElementById("generate_status")
+            fetch("/start_meeting_invites")
+                .then(response => response.json())
+                .then(data => console.log(data))
+                .then(() => {
+                    interval = setInterval(check_progress, 1000, "generate_bar")
+
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        function check_progress(progress_bar_id){
+            fetch("/check_progress")
+                .then(response => response.json())
+                .then(response => {
+                    if (response.error_message == "retrieval_error"){
+                        status.innerHTML = "Schedule Retrieval Process Failed: Try Again";
+                        retrieve_btn.removeAttribute("disabled")
+                        throw "Retrieval Process Failed"
+                    };
+                    if (response.error_message == "generate_error"){
+                        status.innerHTML = "Generate Invites Process Failed: Try Again";
+                        generate_btn.removeAttribute("disabled")
+                        throw "Generate Process Failed"
+                    }
+                    let width = "width: " + response.progress + "%";
+                    const progress_bar = document.getElementById(progress_bar_id)
+                    if (response.progress != 0){
+                        progress_bar.setAttribute("style", width);
+                    }
+                    console.log(response.progress)
+                    if (response.progress >= 99){
+                        status.innerHTML = "Successfully Completed";
+                        progress_bar.setAttribute("style", "width: " + 100 + "%");
+                        if(progress_bar_id == "retrieve_bar"){
+                            generate_btn.setAttribute("disabled", false)
+                            generate_btn.removeAttribute("disabled")
+                            console.log("is this being triggered")
+                        }
+                        clearInterval(interval)
+                    };
+                })
+                .catch(error => {
+                    console.error('Error:', error)
+                    clearInterval(interval);
+                });
+
+        }
+
+
+    </script>
+</body>
+</html>
